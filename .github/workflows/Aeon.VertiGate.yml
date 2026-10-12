@@ -308,6 +308,9 @@ jobs:
       - name: Set up .NET tools
         run: dotnet tool restore
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.3.2
+
       # ----------------------------------------------------------------------- Configure build
       - name: Configure build
         id: configure-build
@@ -321,6 +324,9 @@ jobs:
       - name: Build metadata
         id: build-metadata
         run: dotnet docfx metadata docs/docfx.json --noRestore
+
+      - name: Generate Python API reference
+        run: uv run --locked docs/bonsai-docfx/scripts/generate-python-api.py --search-path software/python/src --inventory https://harp-tech.org/python/objects.inv
 
       # ----------------------------------------------------------------------- Build documentation
       - name: Build documentation

@@ -12,6 +12,7 @@ try {
     $libPaths += "..\artifacts\package\release"
 
     ./export-images.ps1 $libPaths
+    uv run --locked bonsai-docfx/scripts/generate-python-api.py --search-path software/python/src --inventory https://harp-tech.org/python/objects.inv
     dotnet docfx metadata
     dotnet docfx build $docfxArgs
 } finally {
