@@ -1,0 +1,30 @@
+# The environment for working on the firmware. It is not published.
+#
+# The rest of the firmware toolchain is pinned: the libraries below are git
+# dependencies at exact commits, and CI pins the MicroPython version. This pins
+# the host tools the same way, so a new mpremote cannot change how the board is
+# flashed without the lockfile changing too.
+#
+#     uv run --directory firmware mpremote connect COM3 devs
+[project]
+name = "vertigate-firmware-tools"
+version = "0"
+description = "Host tools for flashing and inspecting the VertiGate firmware. Not published."
+requires-python = ">=3.11"
+dependencies = [
+  "mpremote>=1.24",
+  "pyserial>=3.5",
+]
+
+[dependency-groups]
+libs = [
+  "micropython-microharp",
+  "micropython-dynamixel",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+micropython-microharp = { git = "https://github.com/SainsburyWellcomeCentre/micropython-microharp", rev = "3b71b85e24cb6a7f9c865c0ea67d3063e632e4e0" }
+micropython-dynamixel = { git = "https://github.com/SainsburyWellcomeCentre/micropython-dynamixel", rev = "b2e618a68d50ce621062492f37d501d137e42a54" }
