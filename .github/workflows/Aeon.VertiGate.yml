@@ -334,7 +334,8 @@ jobs:
       # ----------------------------------------------------------------------- Build documentation
       - name: Build documentation
         id: build-documentation
-        run: dotnet docfx build docs/docfx.json
+        working-directory: tools
+        run: dotnet tool run docfx build ../docs/docfx.json
 
       # ----------------------------------------------------------------------- Collect artifacts
       - name: Collect documentation metadata
