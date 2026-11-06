@@ -14,8 +14,11 @@ from task import setup_user_task
 from microharp import HarpDevice, CdcTransport
 from microharp.registers import R_HARP_VERSION_H, R_HARP_VERSION_L
 
-# Generated from device.yml. Bonsai reads these on connect.
-from version import WHO_AM_I, FW_VERSION, HW_VERSION, HARP_VERSION
+WHO_AM_I = 3002
+FW_VERSION = (1, 0)
+HW_VERSION = (1, 0)
+HARP_VERSION = (1, 13)
+
 
 
 def main():
