@@ -395,7 +395,7 @@ jobs:
       - name: Set up Bonsai environments
         uses: bonsai-rx/setup-bonsai@v2
         with:
-          environment-paths: '.bonsai/'
+          environment-paths: 'tools/.bonsai/'
           inject-packages: artifacts/packages/*.nupkg
 
       # ----------------------------------------------------------------------- Render
