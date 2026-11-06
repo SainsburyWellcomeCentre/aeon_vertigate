@@ -1,0 +1,9 @@
+
+
+# MicroPython firmware development
+.vscode/
+.micropico
+typings/
+lib/
+
+test.py

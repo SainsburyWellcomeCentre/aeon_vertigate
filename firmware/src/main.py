@@ -1,6 +1,7 @@
 import asyncio
 import sys
-from machine import Pin, UART
+from machine import Pin, UART, I2C
+from dac5571 import VMControl
 from usb.device.cdc import CDCInterface
 import usb.device
 from gate import Gate
@@ -14,17 +15,19 @@ from microharp import HarpDevice, CdcTransport
 from microharp.registers import R_HARP_VERSION_H, R_HARP_VERSION_L
 
 # Generated from device.yml. Bonsai reads these on connect.
-from _version import WHO_AM_I, FW_VERSION, HW_VERSION, HARP_VERSION
+from version import WHO_AM_I, FW_VERSION, HW_VERSION, HARP_VERSION
 
 
 def main():
     Pin(11, Pin.OUT, value=1)
     Pin(12, Pin.OUT, value=0)
     Pin(13, Pin.OUT, value=1)
-
+    i2c = I2C(1, scl=Pin(23), sda=Pin(22), freq=400_000)
+    uart = UART(1, baudrate=1_000_000, tx=Pin(8), rx=Pin(9))
+    vm = VMControl(i2c, enable_pin=27)
     myled = Pin(7, Pin.OUT, value=0)
     myCLK = UART(0, baudrate=100_000, rx=Pin(1))
-    myGate = Gate(UART(1, baudrate=1_000_000, tx=Pin(8), rx=Pin(9)))
+    myGate = Gate(uart, vm)
     # builtin_driver=True keeps the MicroPython REPL on its own USB serial port
     # next to the Harp port. mpremote and tracebacks stay available. Set it to
     # False for a release build with a single port.
@@ -52,13 +55,14 @@ def main():
     # Control.Calibrate runs the same task again on request.
     @device.task
     async def _home_at_boot():
-        if boot_motor_enabled():
-            myGate.start_calibration()
-        else:
-            # The gate was stored with the motor off. Do not move it. The
-            # latch refuses every movement command until the host enables
-            # the motor, and the gate reports Idle because it is not homed.
-            myGate.disable()
+        myGate.start_calibration()
+        # if boot_motor_enabled():
+        #     myGate.start_calibration()
+        # else:
+        #     # The gate was stored with the motor off. Do not move it. The
+        #     # latch refuses every movement command until the host enables
+        #     # the motor, and the gate reports Idle because it is not homed.
+        #     myGate.disable()
 
     asyncio.run(device.run())
 
