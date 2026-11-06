@@ -56,7 +56,8 @@ jobs:
           dotnet-version: 8.x
 
       - name: Set up .NET tools
-        run: dotnet tool restore --tool-manifest tools/.config/dotnet-tools.json
+        working-directory: tools
+        run: dotnet tool restore
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v8.3.2
@@ -64,10 +65,12 @@ jobs:
       # ----------------------------------------------------------------------- Regenerate
 
       - name: Generate C# interface
-        run: dotnet tool run harp.toolkit generate interface csharp device.yml --namespace Aeon.VertiGate --output software/dotnet/Aeon.VertiGate
+        working-directory: tools
+        run: dotnet tool run harp.toolkit generate interface csharp ../device.yml --namespace Aeon.VertiGate --output ../software/dotnet/Aeon.VertiGate
 
       - name: Generate Python interface
-        run: dotnet tool run harp.toolkit generate interface python device.yml --package --output software/python/src/swc/aeon/device/vertigate
+        working-directory: tools
+        run: dotnet tool run harp.toolkit generate interface python ../device.yml --package --output ../software/python/src/swc/aeon/device/vertigate
 
       # ----------------------------------------------------------------------- Verify
       - name: Verify pre-generated code was up-to-date
@@ -201,7 +204,8 @@ jobs:
           dotnet-version: 8.x
 
       - name: Set up .NET tools
-        run: dotnet tool restore --tool-manifest tools/.config/dotnet-tools.json
+        working-directory: tools
+        run: dotnet tool restore
 
       # ----------------------------------------------------------------------- Configure build
       - name: Configure build
@@ -303,7 +307,8 @@ jobs:
           dotnet-version: 8.x
 
       - name: Set up .NET tools
-        run: dotnet tool restore --tool-manifest tools/.config/dotnet-tools.json
+        working-directory: tools
+        run: dotnet tool restore
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v8.3.2
@@ -320,7 +325,8 @@ jobs:
       # ----------------------------------------------------------------------- Build metadata
       - name: Build metadata
         id: build-metadata
-        run: dotnet docfx metadata docs/docfx.json --noRestore
+        working-directory: tools
+        run: dotnet tool run docfx metadata ../docs/docfx.json --noRestore
 
       - name: Generate Python API reference
         run: uv run --locked docs/bonsai-docfx/scripts/generate-python-api.py --search-path software/python/src --inventory https://harp-tech.org/python/objects.inv
