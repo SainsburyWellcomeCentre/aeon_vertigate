@@ -153,7 +153,7 @@ class RawPositionPayload(StructPayload[np.int32], length=2):
 
 
 class Control(RegisterBase[ControlFlags]):
-    """Commands for the gate. Writing a bit runs one command. A write with both bits of a pair set is rejected with an error reply. Reading reports the state, not the last command: EnableMotor when the motor is on, EnablePositionEvent when Position events are on, and EnableTelemetryEvent when ServoTelemetry events are on. Stop and Calibrate are commands, so they never appear in a read. The state is kept over a power cycle."""
+    """Sends a command to the gate and reports the active states."""
 
     address: ClassVar[int] = 32
     payload_type: ClassVar[PayloadType] = PayloadType.U8
@@ -161,7 +161,7 @@ class Control(RegisterBase[ControlFlags]):
 
 
 class TargetPosition(RegisterU8):
-    """Target position of the gate. 0 lowers the gate fully down, 255 raises it fully up, and any value in between moves the gate to the matching position. One count is 1.2 mm. The gate stops at step 250. A write of 251 to 255 moves the gate to the same place as 250."""
+    """Sets the target position of the gate."""
 
     address: ClassVar[int] = 33
 
@@ -175,25 +175,25 @@ class GateState(RegisterBase[GateStatus]):
 
 
 class Speed(RegisterU8):
-    """Movement speed of the gate, mapped onto the Dynamixel profile velocity. One count adds 0.38 mm/s. A write of 0 is the slowest motion and not a stop, because the servo receives this value plus a fixed offset of 60. Use the Stop bit of Control to halt a movement. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled."""
+    """Sets the movement speed of the gate."""
 
     address: ClassVar[int] = 35
 
 
 class Torque(RegisterU8):
-    """Torque limit applied to the gate motor, as a servo current limit. Values are masked to the lower 7 bits. One count is 0.36 kgf·mm. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled."""
+    """Sets the torque limit of the gate motor."""
 
     address: ClassVar[int] = 36
 
 
 class CalibrationOffset(RegisterS8):
-    """Offset applied to the fully-raised position, to trim the end stop without moving hardware. One count is one encoder count, 25 µm."""
+    """Sets the offset applied to the fully-raised position of the gate."""
 
     address: ClassVar[int] = 37
 
 
 class MotorState(RegisterBase[MotorStatus]):
-    """Reports whether the motor holds the gate. DisableMotor and EnableMotor set it."""
+    """Reports whether the motor holds the gate."""
 
     address: ClassVar[int] = 38
     payload_type: ClassVar[PayloadType] = PayloadType.U8
@@ -201,13 +201,13 @@ class MotorState(RegisterBase[MotorStatus]):
 
 
 class Position(RegisterU8):
-    """Where the gate is now, on the same scale as TargetPosition. Read it at any time. EnablePositionEvent also reports it while the gate moves or homes. Homing measures against the old home until the new one is recorded, so the value steps at the end of a calibration. One count is 1.2 mm. The value stops at 250, like TargetPosition."""
+    """Reports the current position of the gate."""
 
     address: ClassVar[int] = 39
 
 
 class ServoTelemetry(RegisterBase[ServoTelemetryPayload]):
-    """Readings from the servo. Read it at any time. EnableTelemetryEvent also reports it once a second."""
+    """Reports the voltage, temperature, current and error status of the servo."""
 
     address: ClassVar[int] = 40
     payload_type: ClassVar[PayloadType] = PayloadType.S16
@@ -215,7 +215,7 @@ class ServoTelemetry(RegisterBase[ServoTelemetryPayload]):
 
 
 class RawPosition(RegisterBase[RawPositionPayload]):
-    """The two encoder counts that Position is built from. Read it at any time. EnablePositionEvent also reports it beside every Position event. Position is Encoder minus Home, divided by 48 and clamped to 0 to 255, so this pair shows the travel the clamp hides and the step when a calibration records a new home. One count is 25 um."""
+    """Reports the encoder counts used to calculate the gate position."""
 
     address: ClassVar[int] = 41
     payload_type: ClassVar[PayloadType] = PayloadType.S32

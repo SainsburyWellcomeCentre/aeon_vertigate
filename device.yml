@@ -18,24 +18,14 @@ registers:
     type: U8
     maskType: ControlFlags
     volatile: false
-    description: >-
-      Commands for the gate. Writing a bit runs one command. A write with both
-      bits of a pair set is rejected with an error reply. Reading reports the
-      state, not the last command: EnableMotor when the motor is on,
-      EnablePositionEvent when Position events are on, and EnableTelemetryEvent
-      when ServoTelemetry events are on. Stop and Calibrate are commands, so
-      they never appear in a read. The state is kept over a power cycle.
+    description: Sends a command to the gate and reports the active states.
   TargetPosition:
     address: 33
     access: Write
     type: U8
     minValue: 0
     maxValue: 255
-    description: >-
-      Target position of the gate. 0 lowers the gate fully down, 255 raises it
-      fully up, and any value in between moves the gate to the matching
-      position. One count is 1.2 mm. The gate stops at step 250. A write of 251
-      to 255 moves the gate to the same place as 250.
+    description: Sets the target position of the gate.
   GateState:
     address: 34
     access: Event
@@ -50,13 +40,7 @@ registers:
     maxValue: 255
     defaultValue: 255
     volatile: false
-    description: >-
-      Movement speed of the gate, mapped onto the Dynamixel profile velocity.
-      One count adds 0.38 mm/s. A write of 0 is the slowest motion and not a
-      stop, because the servo receives this value plus a fixed offset of 60.
-      Use the Stop bit of Control to halt a movement. Writing this register
-      switches the motor off and on, so the gate drops for a moment if it is
-      holding a position. It leaves the motor off if MotorState is Disabled.
+    description: Sets the movement speed of the gate.
   Torque:
     address: 36
     access: Write
@@ -65,12 +49,7 @@ registers:
     maxValue: 127
     defaultValue: 35
     volatile: false
-    description: >-
-      Torque limit applied to the gate motor, as a servo current limit. Values
-      are masked to the lower 7 bits. One count is 0.36 kgf·mm. Writing this
-      register switches the motor off and on, so the gate drops for a moment if
-      it is holding a position. It leaves the motor off if MotorState is
-      Disabled.
+    description: Sets the torque limit of the gate motor.
   CalibrationOffset:
     address: 37
     access: Write
@@ -79,35 +58,26 @@ registers:
     maxValue: 127
     defaultValue: 0
     volatile: false
-    description: >-
-      Offset applied to the fully-raised position, to trim the end stop without
-      moving hardware. One count is one encoder count, 25 µm.
+    description: Sets the offset applied to the fully-raised position of the gate.
   MotorState:
     address: 38
     access: Event
     type: U8
     maskType: MotorStatus
-    description: Reports whether the motor holds the gate. DisableMotor and EnableMotor set it.
+    description: Reports whether the motor holds the gate.
   Position:
     address: 39
     access: Event
     type: U8
     minValue: 0
     maxValue: 255
-    description: >-
-      Where the gate is now, on the same scale as TargetPosition. Read it at any
-      time. EnablePositionEvent also reports it while the gate moves or homes.
-      Homing measures against the old home until the new one is recorded, so the
-      value steps at the end of a calibration. One count is 1.2 mm. The value
-      stops at 250, like TargetPosition.
+    description: Reports the current position of the gate.
   ServoTelemetry:
     address: 40
     access: Event
     type: S16
     length: 4
-    description: >-
-      Readings from the servo. Read it at any time. EnableTelemetryEvent also
-      reports it once a second.
+    description: Reports the voltage, temperature, current and error status of the servo.
     payloadSpec:
       Voltage:
         offset: 0
@@ -126,12 +96,7 @@ registers:
     access: Event
     type: S32
     length: 2
-    description: >-
-      The two encoder counts that Position is built from. Read it at any time.
-      EnablePositionEvent also reports it beside every Position event. Position
-      is Encoder minus Home, divided by 48 and clamped to 0 to 255, so this pair
-      shows the travel the clamp hides and the step when a calibration records a
-      new home. One count is 25 um.
+    description: Reports the encoder counts used to calculate the gate position.
     payloadSpec:
       Encoder:
         offset: 0

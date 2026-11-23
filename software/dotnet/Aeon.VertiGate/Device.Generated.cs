@@ -394,9 +394,9 @@ namespace Aeon.VertiGate
     }
 
     /// <summary>
-    /// Represents a register that commands for the gate. Writing a bit runs one command. A write with both bits of a pair set is rejected with an error reply. Reading reports the state, not the last command: EnableMotor when the motor is on, EnablePositionEvent when Position events are on, and EnableTelemetryEvent when ServoTelemetry events are on. Stop and Calibrate are commands, so they never appear in a read. The state is kept over a power cycle.
+    /// Represents a register that sends a command to the gate and reports the active states.
     /// </summary>
-    [Description("Commands for the gate. Writing a bit runs one command. A write with both bits of a pair set is rejected with an error reply. Reading reports the state, not the last command: EnableMotor when the motor is on, EnablePositionEvent when Position events are on, and EnableTelemetryEvent when ServoTelemetry events are on. Stop and Calibrate are commands, so they never appear in a read. The state is kept over a power cycle.")]
+    [Description("Sends a command to the gate and reports the active states.")]
     public partial class Control
     {
         /// <summary>
@@ -491,9 +491,9 @@ namespace Aeon.VertiGate
     }
 
     /// <summary>
-    /// Represents a register that target position of the gate. 0 lowers the gate fully down, 255 raises it fully up, and any value in between moves the gate to the matching position. One count is 1.2 mm. The gate stops at step 250. A write of 251 to 255 moves the gate to the same place as 250.
+    /// Represents a register that sets the target position of the gate.
     /// </summary>
-    [Description("Target position of the gate. 0 lowers the gate fully down, 255 raises it fully up, and any value in between moves the gate to the matching position. One count is 1.2 mm. The gate stops at step 250. A write of 251 to 255 moves the gate to the same place as 250.")]
+    [Description("Sets the target position of the gate.")]
     public partial class TargetPosition
     {
         /// <summary>
@@ -684,9 +684,9 @@ namespace Aeon.VertiGate
     }
 
     /// <summary>
-    /// Represents a register that movement speed of the gate, mapped onto the Dynamixel profile velocity. One count adds 0.38 mm/s. A write of 0 is the slowest motion and not a stop, because the servo receives this value plus a fixed offset of 60. Use the Stop bit of Control to halt a movement. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.
+    /// Represents a register that sets the movement speed of the gate.
     /// </summary>
-    [Description("Movement speed of the gate, mapped onto the Dynamixel profile velocity. One count adds 0.38 mm/s. A write of 0 is the slowest motion and not a stop, because the servo receives this value plus a fixed offset of 60. Use the Stop bit of Control to halt a movement. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.")]
+    [Description("Sets the movement speed of the gate.")]
     public partial class Speed
     {
         /// <summary>
@@ -780,9 +780,9 @@ namespace Aeon.VertiGate
     }
 
     /// <summary>
-    /// Represents a register that torque limit applied to the gate motor, as a servo current limit. Values are masked to the lower 7 bits. One count is 0.36 kgf·mm. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.
+    /// Represents a register that sets the torque limit of the gate motor.
     /// </summary>
-    [Description("Torque limit applied to the gate motor, as a servo current limit. Values are masked to the lower 7 bits. One count is 0.36 kgf·mm. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.")]
+    [Description("Sets the torque limit of the gate motor.")]
     public partial class Torque
     {
         /// <summary>
@@ -876,9 +876,9 @@ namespace Aeon.VertiGate
     }
 
     /// <summary>
-    /// Represents a register that offset applied to the fully-raised position, to trim the end stop without moving hardware. One count is one encoder count, 25 µm.
+    /// Represents a register that sets the offset applied to the fully-raised position of the gate.
     /// </summary>
-    [Description("Offset applied to the fully-raised position, to trim the end stop without moving hardware. One count is one encoder count, 25 µm.")]
+    [Description("Sets the offset applied to the fully-raised position of the gate.")]
     public partial class CalibrationOffset
     {
         /// <summary>
@@ -972,9 +972,9 @@ namespace Aeon.VertiGate
     }
 
     /// <summary>
-    /// Represents a register that reports whether the motor holds the gate. DisableMotor and EnableMotor set it.
+    /// Represents a register that reports whether the motor holds the gate.
     /// </summary>
-    [Description("Reports whether the motor holds the gate. DisableMotor and EnableMotor set it.")]
+    [Description("Reports whether the motor holds the gate.")]
     public partial class MotorState
     {
         /// <summary>
@@ -1069,9 +1069,9 @@ namespace Aeon.VertiGate
     }
 
     /// <summary>
-    /// Represents a register that where the gate is now, on the same scale as TargetPosition. Read it at any time. EnablePositionEvent also reports it while the gate moves or homes. Homing measures against the old home until the new one is recorded, so the value steps at the end of a calibration. One count is 1.2 mm. The value stops at 250, like TargetPosition.
+    /// Represents a register that reports the current position of the gate.
     /// </summary>
-    [Description("Where the gate is now, on the same scale as TargetPosition. Read it at any time. EnablePositionEvent also reports it while the gate moves or homes. Homing measures against the old home until the new one is recorded, so the value steps at the end of a calibration. One count is 1.2 mm. The value stops at 250, like TargetPosition.")]
+    [Description("Reports the current position of the gate.")]
     public partial class Position
     {
         /// <summary>
@@ -1165,9 +1165,9 @@ namespace Aeon.VertiGate
     }
 
     /// <summary>
-    /// Represents a register that readings from the servo. Read it at any time. EnableTelemetryEvent also reports it once a second.
+    /// Represents a register that reports the voltage, temperature, current and error status of the servo.
     /// </summary>
-    [Description("Readings from the servo. Read it at any time. EnableTelemetryEvent also reports it once a second.")]
+    [Description("Reports the voltage, temperature, current and error status of the servo.")]
     public partial class ServoTelemetry
     {
         /// <summary>
@@ -1283,9 +1283,9 @@ namespace Aeon.VertiGate
     }
 
     /// <summary>
-    /// Represents a register that the two encoder counts that Position is built from. Read it at any time. EnablePositionEvent also reports it beside every Position event. Position is Encoder minus Home, divided by 48 and clamped to 0 to 255, so this pair shows the travel the clamp hides and the step when a calibration records a new home. One count is 25 um.
+    /// Represents a register that reports the encoder counts used to calculate the gate position.
     /// </summary>
-    [Description("The two encoder counts that Position is built from. Read it at any time. EnablePositionEvent also reports it beside every Position event. Position is Encoder minus Home, divided by 48 and clamped to 0 to 255, so this pair shows the travel the clamp hides and the step when a calibration records a new home. One count is 25 um.")]
+    [Description("Reports the encoder counts used to calculate the gate position.")]
     public partial class RawPosition
     {
         /// <summary>
@@ -1446,16 +1446,16 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a message payload
-    /// that commands for the gate. Writing a bit runs one command. A write with both bits of a pair set is rejected with an error reply. Reading reports the state, not the last command: EnableMotor when the motor is on, EnablePositionEvent when Position events are on, and EnableTelemetryEvent when ServoTelemetry events are on. Stop and Calibrate are commands, so they never appear in a read. The state is kept over a power cycle.
+    /// that sends a command to the gate and reports the active states.
     /// </summary>
     [DisplayName("ControlPayload")]
-    [Description("Creates a message payload that commands for the gate. Writing a bit runs one command. A write with both bits of a pair set is rejected with an error reply. Reading reports the state, not the last command: EnableMotor when the motor is on, EnablePositionEvent when Position events are on, and EnableTelemetryEvent when ServoTelemetry events are on. Stop and Calibrate are commands, so they never appear in a read. The state is kept over a power cycle.")]
+    [Description("Creates a message payload that sends a command to the gate and reports the active states.")]
     public partial class CreateControlPayload
     {
         /// <summary>
-        /// Gets or sets the value that commands for the gate. Writing a bit runs one command. A write with both bits of a pair set is rejected with an error reply. Reading reports the state, not the last command: EnableMotor when the motor is on, EnablePositionEvent when Position events are on, and EnableTelemetryEvent when ServoTelemetry events are on. Stop and Calibrate are commands, so they never appear in a read. The state is kept over a power cycle.
+        /// Gets or sets the value that sends a command to the gate and reports the active states.
         /// </summary>
-        [Description("The value that commands for the gate. Writing a bit runs one command. A write with both bits of a pair set is rejected with an error reply. Reading reports the state, not the last command: EnableMotor when the motor is on, EnablePositionEvent when Position events are on, and EnableTelemetryEvent when ServoTelemetry events are on. Stop and Calibrate are commands, so they never appear in a read. The state is kept over a power cycle.")]
+        [Description("The value that sends a command to the gate and reports the active states.")]
         public ControlFlags Control { get; set; }
 
         /// <summary>
@@ -1468,7 +1468,7 @@ namespace Aeon.VertiGate
         }
 
         /// <summary>
-        /// Creates a message that commands for the gate. Writing a bit runs one command. A write with both bits of a pair set is rejected with an error reply. Reading reports the state, not the last command: EnableMotor when the motor is on, EnablePositionEvent when Position events are on, and EnableTelemetryEvent when ServoTelemetry events are on. Stop and Calibrate are commands, so they never appear in a read. The state is kept over a power cycle.
+        /// Creates a message that sends a command to the gate and reports the active states.
         /// </summary>
         /// <param name="messageType">Specifies the type of the created message.</param>
         /// <returns>A new message for the Control register.</returns>
@@ -1480,14 +1480,14 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a timestamped message payload
-    /// that commands for the gate. Writing a bit runs one command. A write with both bits of a pair set is rejected with an error reply. Reading reports the state, not the last command: EnableMotor when the motor is on, EnablePositionEvent when Position events are on, and EnableTelemetryEvent when ServoTelemetry events are on. Stop and Calibrate are commands, so they never appear in a read. The state is kept over a power cycle.
+    /// that sends a command to the gate and reports the active states.
     /// </summary>
     [DisplayName("TimestampedControlPayload")]
-    [Description("Creates a timestamped message payload that commands for the gate. Writing a bit runs one command. A write with both bits of a pair set is rejected with an error reply. Reading reports the state, not the last command: EnableMotor when the motor is on, EnablePositionEvent when Position events are on, and EnableTelemetryEvent when ServoTelemetry events are on. Stop and Calibrate are commands, so they never appear in a read. The state is kept over a power cycle.")]
+    [Description("Creates a timestamped message payload that sends a command to the gate and reports the active states.")]
     public partial class CreateTimestampedControlPayload : CreateControlPayload
     {
         /// <summary>
-        /// Creates a timestamped message that commands for the gate. Writing a bit runs one command. A write with both bits of a pair set is rejected with an error reply. Reading reports the state, not the last command: EnableMotor when the motor is on, EnablePositionEvent when Position events are on, and EnableTelemetryEvent when ServoTelemetry events are on. Stop and Calibrate are commands, so they never appear in a read. The state is kept over a power cycle.
+        /// Creates a timestamped message that sends a command to the gate and reports the active states.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">Specifies the type of the created message.</param>
@@ -1500,18 +1500,18 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a message payload
-    /// that target position of the gate. 0 lowers the gate fully down, 255 raises it fully up, and any value in between moves the gate to the matching position. One count is 1.2 mm. The gate stops at step 250. A write of 251 to 255 moves the gate to the same place as 250.
+    /// that sets the target position of the gate.
     /// </summary>
     [DisplayName("TargetPositionPayload")]
-    [Description("Creates a message payload that target position of the gate. 0 lowers the gate fully down, 255 raises it fully up, and any value in between moves the gate to the matching position. One count is 1.2 mm. The gate stops at step 250. A write of 251 to 255 moves the gate to the same place as 250.")]
+    [Description("Creates a message payload that sets the target position of the gate.")]
     public partial class CreateTargetPositionPayload
     {
         /// <summary>
-        /// Gets or sets the value that target position of the gate. 0 lowers the gate fully down, 255 raises it fully up, and any value in between moves the gate to the matching position. One count is 1.2 mm. The gate stops at step 250. A write of 251 to 255 moves the gate to the same place as 250.
+        /// Gets or sets the value that sets the target position of the gate.
         /// </summary>
         [Range(min: 0, max: 255)]
         [Editor(DesignTypes.NumericUpDownEditor, DesignTypes.UITypeEditor)]
-        [Description("The value that target position of the gate. 0 lowers the gate fully down, 255 raises it fully up, and any value in between moves the gate to the matching position. One count is 1.2 mm. The gate stops at step 250. A write of 251 to 255 moves the gate to the same place as 250.")]
+        [Description("The value that sets the target position of the gate.")]
         public byte TargetPosition { get; set; } = 0;
 
         /// <summary>
@@ -1524,7 +1524,7 @@ namespace Aeon.VertiGate
         }
 
         /// <summary>
-        /// Creates a message that target position of the gate. 0 lowers the gate fully down, 255 raises it fully up, and any value in between moves the gate to the matching position. One count is 1.2 mm. The gate stops at step 250. A write of 251 to 255 moves the gate to the same place as 250.
+        /// Creates a message that sets the target position of the gate.
         /// </summary>
         /// <param name="messageType">Specifies the type of the created message.</param>
         /// <returns>A new message for the TargetPosition register.</returns>
@@ -1536,14 +1536,14 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a timestamped message payload
-    /// that target position of the gate. 0 lowers the gate fully down, 255 raises it fully up, and any value in between moves the gate to the matching position. One count is 1.2 mm. The gate stops at step 250. A write of 251 to 255 moves the gate to the same place as 250.
+    /// that sets the target position of the gate.
     /// </summary>
     [DisplayName("TimestampedTargetPositionPayload")]
-    [Description("Creates a timestamped message payload that target position of the gate. 0 lowers the gate fully down, 255 raises it fully up, and any value in between moves the gate to the matching position. One count is 1.2 mm. The gate stops at step 250. A write of 251 to 255 moves the gate to the same place as 250.")]
+    [Description("Creates a timestamped message payload that sets the target position of the gate.")]
     public partial class CreateTimestampedTargetPositionPayload : CreateTargetPositionPayload
     {
         /// <summary>
-        /// Creates a timestamped message that target position of the gate. 0 lowers the gate fully down, 255 raises it fully up, and any value in between moves the gate to the matching position. One count is 1.2 mm. The gate stops at step 250. A write of 251 to 255 moves the gate to the same place as 250.
+        /// Creates a timestamped message that sets the target position of the gate.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">Specifies the type of the created message.</param>
@@ -1610,18 +1610,18 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a message payload
-    /// that movement speed of the gate, mapped onto the Dynamixel profile velocity. One count adds 0.38 mm/s. A write of 0 is the slowest motion and not a stop, because the servo receives this value plus a fixed offset of 60. Use the Stop bit of Control to halt a movement. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.
+    /// that sets the movement speed of the gate.
     /// </summary>
     [DisplayName("SpeedPayload")]
-    [Description("Creates a message payload that movement speed of the gate, mapped onto the Dynamixel profile velocity. One count adds 0.38 mm/s. A write of 0 is the slowest motion and not a stop, because the servo receives this value plus a fixed offset of 60. Use the Stop bit of Control to halt a movement. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.")]
+    [Description("Creates a message payload that sets the movement speed of the gate.")]
     public partial class CreateSpeedPayload
     {
         /// <summary>
-        /// Gets or sets the value that movement speed of the gate, mapped onto the Dynamixel profile velocity. One count adds 0.38 mm/s. A write of 0 is the slowest motion and not a stop, because the servo receives this value plus a fixed offset of 60. Use the Stop bit of Control to halt a movement. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.
+        /// Gets or sets the value that sets the movement speed of the gate.
         /// </summary>
         [Range(min: 0, max: 255)]
         [Editor(DesignTypes.NumericUpDownEditor, DesignTypes.UITypeEditor)]
-        [Description("The value that movement speed of the gate, mapped onto the Dynamixel profile velocity. One count adds 0.38 mm/s. A write of 0 is the slowest motion and not a stop, because the servo receives this value plus a fixed offset of 60. Use the Stop bit of Control to halt a movement. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.")]
+        [Description("The value that sets the movement speed of the gate.")]
         public byte Speed { get; set; } = 255;
 
         /// <summary>
@@ -1634,7 +1634,7 @@ namespace Aeon.VertiGate
         }
 
         /// <summary>
-        /// Creates a message that movement speed of the gate, mapped onto the Dynamixel profile velocity. One count adds 0.38 mm/s. A write of 0 is the slowest motion and not a stop, because the servo receives this value plus a fixed offset of 60. Use the Stop bit of Control to halt a movement. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.
+        /// Creates a message that sets the movement speed of the gate.
         /// </summary>
         /// <param name="messageType">Specifies the type of the created message.</param>
         /// <returns>A new message for the Speed register.</returns>
@@ -1646,14 +1646,14 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a timestamped message payload
-    /// that movement speed of the gate, mapped onto the Dynamixel profile velocity. One count adds 0.38 mm/s. A write of 0 is the slowest motion and not a stop, because the servo receives this value plus a fixed offset of 60. Use the Stop bit of Control to halt a movement. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.
+    /// that sets the movement speed of the gate.
     /// </summary>
     [DisplayName("TimestampedSpeedPayload")]
-    [Description("Creates a timestamped message payload that movement speed of the gate, mapped onto the Dynamixel profile velocity. One count adds 0.38 mm/s. A write of 0 is the slowest motion and not a stop, because the servo receives this value plus a fixed offset of 60. Use the Stop bit of Control to halt a movement. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.")]
+    [Description("Creates a timestamped message payload that sets the movement speed of the gate.")]
     public partial class CreateTimestampedSpeedPayload : CreateSpeedPayload
     {
         /// <summary>
-        /// Creates a timestamped message that movement speed of the gate, mapped onto the Dynamixel profile velocity. One count adds 0.38 mm/s. A write of 0 is the slowest motion and not a stop, because the servo receives this value plus a fixed offset of 60. Use the Stop bit of Control to halt a movement. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.
+        /// Creates a timestamped message that sets the movement speed of the gate.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">Specifies the type of the created message.</param>
@@ -1666,18 +1666,18 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a message payload
-    /// that torque limit applied to the gate motor, as a servo current limit. Values are masked to the lower 7 bits. One count is 0.36 kgf·mm. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.
+    /// that sets the torque limit of the gate motor.
     /// </summary>
     [DisplayName("TorquePayload")]
-    [Description("Creates a message payload that torque limit applied to the gate motor, as a servo current limit. Values are masked to the lower 7 bits. One count is 0.36 kgf·mm. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.")]
+    [Description("Creates a message payload that sets the torque limit of the gate motor.")]
     public partial class CreateTorquePayload
     {
         /// <summary>
-        /// Gets or sets the value that torque limit applied to the gate motor, as a servo current limit. Values are masked to the lower 7 bits. One count is 0.36 kgf·mm. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.
+        /// Gets or sets the value that sets the torque limit of the gate motor.
         /// </summary>
         [Range(min: 0, max: 127)]
         [Editor(DesignTypes.NumericUpDownEditor, DesignTypes.UITypeEditor)]
-        [Description("The value that torque limit applied to the gate motor, as a servo current limit. Values are masked to the lower 7 bits. One count is 0.36 kgf·mm. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.")]
+        [Description("The value that sets the torque limit of the gate motor.")]
         public byte Torque { get; set; } = 35;
 
         /// <summary>
@@ -1690,7 +1690,7 @@ namespace Aeon.VertiGate
         }
 
         /// <summary>
-        /// Creates a message that torque limit applied to the gate motor, as a servo current limit. Values are masked to the lower 7 bits. One count is 0.36 kgf·mm. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.
+        /// Creates a message that sets the torque limit of the gate motor.
         /// </summary>
         /// <param name="messageType">Specifies the type of the created message.</param>
         /// <returns>A new message for the Torque register.</returns>
@@ -1702,14 +1702,14 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a timestamped message payload
-    /// that torque limit applied to the gate motor, as a servo current limit. Values are masked to the lower 7 bits. One count is 0.36 kgf·mm. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.
+    /// that sets the torque limit of the gate motor.
     /// </summary>
     [DisplayName("TimestampedTorquePayload")]
-    [Description("Creates a timestamped message payload that torque limit applied to the gate motor, as a servo current limit. Values are masked to the lower 7 bits. One count is 0.36 kgf·mm. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.")]
+    [Description("Creates a timestamped message payload that sets the torque limit of the gate motor.")]
     public partial class CreateTimestampedTorquePayload : CreateTorquePayload
     {
         /// <summary>
-        /// Creates a timestamped message that torque limit applied to the gate motor, as a servo current limit. Values are masked to the lower 7 bits. One count is 0.36 kgf·mm. Writing this register switches the motor off and on, so the gate drops for a moment if it is holding a position. It leaves the motor off if MotorState is Disabled.
+        /// Creates a timestamped message that sets the torque limit of the gate motor.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">Specifies the type of the created message.</param>
@@ -1722,18 +1722,18 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a message payload
-    /// that offset applied to the fully-raised position, to trim the end stop without moving hardware. One count is one encoder count, 25 µm.
+    /// that sets the offset applied to the fully-raised position of the gate.
     /// </summary>
     [DisplayName("CalibrationOffsetPayload")]
-    [Description("Creates a message payload that offset applied to the fully-raised position, to trim the end stop without moving hardware. One count is one encoder count, 25 µm.")]
+    [Description("Creates a message payload that sets the offset applied to the fully-raised position of the gate.")]
     public partial class CreateCalibrationOffsetPayload
     {
         /// <summary>
-        /// Gets or sets the value that offset applied to the fully-raised position, to trim the end stop without moving hardware. One count is one encoder count, 25 µm.
+        /// Gets or sets the value that sets the offset applied to the fully-raised position of the gate.
         /// </summary>
         [Range(min: -128, max: 127)]
         [Editor(DesignTypes.NumericUpDownEditor, DesignTypes.UITypeEditor)]
-        [Description("The value that offset applied to the fully-raised position, to trim the end stop without moving hardware. One count is one encoder count, 25 µm.")]
+        [Description("The value that sets the offset applied to the fully-raised position of the gate.")]
         public sbyte CalibrationOffset { get; set; } = 0;
 
         /// <summary>
@@ -1746,7 +1746,7 @@ namespace Aeon.VertiGate
         }
 
         /// <summary>
-        /// Creates a message that offset applied to the fully-raised position, to trim the end stop without moving hardware. One count is one encoder count, 25 µm.
+        /// Creates a message that sets the offset applied to the fully-raised position of the gate.
         /// </summary>
         /// <param name="messageType">Specifies the type of the created message.</param>
         /// <returns>A new message for the CalibrationOffset register.</returns>
@@ -1758,14 +1758,14 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a timestamped message payload
-    /// that offset applied to the fully-raised position, to trim the end stop without moving hardware. One count is one encoder count, 25 µm.
+    /// that sets the offset applied to the fully-raised position of the gate.
     /// </summary>
     [DisplayName("TimestampedCalibrationOffsetPayload")]
-    [Description("Creates a timestamped message payload that offset applied to the fully-raised position, to trim the end stop without moving hardware. One count is one encoder count, 25 µm.")]
+    [Description("Creates a timestamped message payload that sets the offset applied to the fully-raised position of the gate.")]
     public partial class CreateTimestampedCalibrationOffsetPayload : CreateCalibrationOffsetPayload
     {
         /// <summary>
-        /// Creates a timestamped message that offset applied to the fully-raised position, to trim the end stop without moving hardware. One count is one encoder count, 25 µm.
+        /// Creates a timestamped message that sets the offset applied to the fully-raised position of the gate.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">Specifies the type of the created message.</param>
@@ -1778,16 +1778,16 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a message payload
-    /// that reports whether the motor holds the gate. DisableMotor and EnableMotor set it.
+    /// that reports whether the motor holds the gate.
     /// </summary>
     [DisplayName("MotorStatePayload")]
-    [Description("Creates a message payload that reports whether the motor holds the gate. DisableMotor and EnableMotor set it.")]
+    [Description("Creates a message payload that reports whether the motor holds the gate.")]
     public partial class CreateMotorStatePayload
     {
         /// <summary>
-        /// Gets or sets the value that reports whether the motor holds the gate. DisableMotor and EnableMotor set it.
+        /// Gets or sets the value that reports whether the motor holds the gate.
         /// </summary>
-        [Description("The value that reports whether the motor holds the gate. DisableMotor and EnableMotor set it.")]
+        [Description("The value that reports whether the motor holds the gate.")]
         public MotorStatus MotorState { get; set; }
 
         /// <summary>
@@ -1800,7 +1800,7 @@ namespace Aeon.VertiGate
         }
 
         /// <summary>
-        /// Creates a message that reports whether the motor holds the gate. DisableMotor and EnableMotor set it.
+        /// Creates a message that reports whether the motor holds the gate.
         /// </summary>
         /// <param name="messageType">Specifies the type of the created message.</param>
         /// <returns>A new message for the MotorState register.</returns>
@@ -1812,14 +1812,14 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a timestamped message payload
-    /// that reports whether the motor holds the gate. DisableMotor and EnableMotor set it.
+    /// that reports whether the motor holds the gate.
     /// </summary>
     [DisplayName("TimestampedMotorStatePayload")]
-    [Description("Creates a timestamped message payload that reports whether the motor holds the gate. DisableMotor and EnableMotor set it.")]
+    [Description("Creates a timestamped message payload that reports whether the motor holds the gate.")]
     public partial class CreateTimestampedMotorStatePayload : CreateMotorStatePayload
     {
         /// <summary>
-        /// Creates a timestamped message that reports whether the motor holds the gate. DisableMotor and EnableMotor set it.
+        /// Creates a timestamped message that reports whether the motor holds the gate.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">Specifies the type of the created message.</param>
@@ -1832,18 +1832,18 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a message payload
-    /// that where the gate is now, on the same scale as TargetPosition. Read it at any time. EnablePositionEvent also reports it while the gate moves or homes. Homing measures against the old home until the new one is recorded, so the value steps at the end of a calibration. One count is 1.2 mm. The value stops at 250, like TargetPosition.
+    /// that reports the current position of the gate.
     /// </summary>
     [DisplayName("PositionPayload")]
-    [Description("Creates a message payload that where the gate is now, on the same scale as TargetPosition. Read it at any time. EnablePositionEvent also reports it while the gate moves or homes. Homing measures against the old home until the new one is recorded, so the value steps at the end of a calibration. One count is 1.2 mm. The value stops at 250, like TargetPosition.")]
+    [Description("Creates a message payload that reports the current position of the gate.")]
     public partial class CreatePositionPayload
     {
         /// <summary>
-        /// Gets or sets the value that where the gate is now, on the same scale as TargetPosition. Read it at any time. EnablePositionEvent also reports it while the gate moves or homes. Homing measures against the old home until the new one is recorded, so the value steps at the end of a calibration. One count is 1.2 mm. The value stops at 250, like TargetPosition.
+        /// Gets or sets the value that reports the current position of the gate.
         /// </summary>
         [Range(min: 0, max: 255)]
         [Editor(DesignTypes.NumericUpDownEditor, DesignTypes.UITypeEditor)]
-        [Description("The value that where the gate is now, on the same scale as TargetPosition. Read it at any time. EnablePositionEvent also reports it while the gate moves or homes. Homing measures against the old home until the new one is recorded, so the value steps at the end of a calibration. One count is 1.2 mm. The value stops at 250, like TargetPosition.")]
+        [Description("The value that reports the current position of the gate.")]
         public byte Position { get; set; } = 0;
 
         /// <summary>
@@ -1856,7 +1856,7 @@ namespace Aeon.VertiGate
         }
 
         /// <summary>
-        /// Creates a message that where the gate is now, on the same scale as TargetPosition. Read it at any time. EnablePositionEvent also reports it while the gate moves or homes. Homing measures against the old home until the new one is recorded, so the value steps at the end of a calibration. One count is 1.2 mm. The value stops at 250, like TargetPosition.
+        /// Creates a message that reports the current position of the gate.
         /// </summary>
         /// <param name="messageType">Specifies the type of the created message.</param>
         /// <returns>A new message for the Position register.</returns>
@@ -1868,14 +1868,14 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a timestamped message payload
-    /// that where the gate is now, on the same scale as TargetPosition. Read it at any time. EnablePositionEvent also reports it while the gate moves or homes. Homing measures against the old home until the new one is recorded, so the value steps at the end of a calibration. One count is 1.2 mm. The value stops at 250, like TargetPosition.
+    /// that reports the current position of the gate.
     /// </summary>
     [DisplayName("TimestampedPositionPayload")]
-    [Description("Creates a timestamped message payload that where the gate is now, on the same scale as TargetPosition. Read it at any time. EnablePositionEvent also reports it while the gate moves or homes. Homing measures against the old home until the new one is recorded, so the value steps at the end of a calibration. One count is 1.2 mm. The value stops at 250, like TargetPosition.")]
+    [Description("Creates a timestamped message payload that reports the current position of the gate.")]
     public partial class CreateTimestampedPositionPayload : CreatePositionPayload
     {
         /// <summary>
-        /// Creates a timestamped message that where the gate is now, on the same scale as TargetPosition. Read it at any time. EnablePositionEvent also reports it while the gate moves or homes. Homing measures against the old home until the new one is recorded, so the value steps at the end of a calibration. One count is 1.2 mm. The value stops at 250, like TargetPosition.
+        /// Creates a timestamped message that reports the current position of the gate.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">Specifies the type of the created message.</param>
@@ -1888,10 +1888,10 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a message payload
-    /// that readings from the servo. Read it at any time. EnableTelemetryEvent also reports it once a second.
+    /// that reports the voltage, temperature, current and error status of the servo.
     /// </summary>
     [DisplayName("ServoTelemetryPayload")]
-    [Description("Creates a message payload that readings from the servo. Read it at any time. EnableTelemetryEvent also reports it once a second.")]
+    [Description("Creates a message payload that reports the voltage, temperature, current and error status of the servo.")]
     public partial class CreateServoTelemetryPayload
     {
         /// <summary>
@@ -1933,7 +1933,7 @@ namespace Aeon.VertiGate
         }
 
         /// <summary>
-        /// Creates a message that readings from the servo. Read it at any time. EnableTelemetryEvent also reports it once a second.
+        /// Creates a message that reports the voltage, temperature, current and error status of the servo.
         /// </summary>
         /// <param name="messageType">Specifies the type of the created message.</param>
         /// <returns>A new message for the ServoTelemetry register.</returns>
@@ -1945,14 +1945,14 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a timestamped message payload
-    /// that readings from the servo. Read it at any time. EnableTelemetryEvent also reports it once a second.
+    /// that reports the voltage, temperature, current and error status of the servo.
     /// </summary>
     [DisplayName("TimestampedServoTelemetryPayload")]
-    [Description("Creates a timestamped message payload that readings from the servo. Read it at any time. EnableTelemetryEvent also reports it once a second.")]
+    [Description("Creates a timestamped message payload that reports the voltage, temperature, current and error status of the servo.")]
     public partial class CreateTimestampedServoTelemetryPayload : CreateServoTelemetryPayload
     {
         /// <summary>
-        /// Creates a timestamped message that readings from the servo. Read it at any time. EnableTelemetryEvent also reports it once a second.
+        /// Creates a timestamped message that reports the voltage, temperature, current and error status of the servo.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">Specifies the type of the created message.</param>
@@ -1965,10 +1965,10 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a message payload
-    /// that the two encoder counts that Position is built from. Read it at any time. EnablePositionEvent also reports it beside every Position event. Position is Encoder minus Home, divided by 48 and clamped to 0 to 255, so this pair shows the travel the clamp hides and the step when a calibration records a new home. One count is 25 um.
+    /// that reports the encoder counts used to calculate the gate position.
     /// </summary>
     [DisplayName("RawPositionPayload")]
-    [Description("Creates a message payload that the two encoder counts that Position is built from. Read it at any time. EnablePositionEvent also reports it beside every Position event. Position is Encoder minus Home, divided by 48 and clamped to 0 to 255, so this pair shows the travel the clamp hides and the step when a calibration records a new home. One count is 25 um.")]
+    [Description("Creates a message payload that reports the encoder counts used to calculate the gate position.")]
     public partial class CreateRawPositionPayload
     {
         /// <summary>
@@ -1996,7 +1996,7 @@ namespace Aeon.VertiGate
         }
 
         /// <summary>
-        /// Creates a message that the two encoder counts that Position is built from. Read it at any time. EnablePositionEvent also reports it beside every Position event. Position is Encoder minus Home, divided by 48 and clamped to 0 to 255, so this pair shows the travel the clamp hides and the step when a calibration records a new home. One count is 25 um.
+        /// Creates a message that reports the encoder counts used to calculate the gate position.
         /// </summary>
         /// <param name="messageType">Specifies the type of the created message.</param>
         /// <returns>A new message for the RawPosition register.</returns>
@@ -2008,14 +2008,14 @@ namespace Aeon.VertiGate
 
     /// <summary>
     /// Represents an operator that creates a timestamped message payload
-    /// that the two encoder counts that Position is built from. Read it at any time. EnablePositionEvent also reports it beside every Position event. Position is Encoder minus Home, divided by 48 and clamped to 0 to 255, so this pair shows the travel the clamp hides and the step when a calibration records a new home. One count is 25 um.
+    /// that reports the encoder counts used to calculate the gate position.
     /// </summary>
     [DisplayName("TimestampedRawPositionPayload")]
-    [Description("Creates a timestamped message payload that the two encoder counts that Position is built from. Read it at any time. EnablePositionEvent also reports it beside every Position event. Position is Encoder minus Home, divided by 48 and clamped to 0 to 255, so this pair shows the travel the clamp hides and the step when a calibration records a new home. One count is 25 um.")]
+    [Description("Creates a timestamped message payload that reports the encoder counts used to calculate the gate position.")]
     public partial class CreateTimestampedRawPositionPayload : CreateRawPositionPayload
     {
         /// <summary>
-        /// Creates a timestamped message that the two encoder counts that Position is built from. Read it at any time. EnablePositionEvent also reports it beside every Position event. Position is Encoder minus Home, divided by 48 and clamped to 0 to 255, so this pair shows the travel the clamp hides and the step when a calibration records a new home. One count is 25 um.
+        /// Creates a timestamped message that reports the encoder counts used to calculate the gate position.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">Specifies the type of the created message.</param>
