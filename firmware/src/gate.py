@@ -3,16 +3,16 @@ from dynamixel.table import ControlTableItem
 from micropython import const
 from asyncio import Event
 import asyncio
-# TODO: check why we have some hex vs dec values in the constants below. 
-# The hex values are from the Dynamixel docs, but the dec values are from the original firmware. 
-# They should be equivalent, but we should check that.
+from machine import UART
+from dac5571 import VMControl
+import time
 
 TRQ_LIM = const(0x7F)
 VEL_LIM = const(0xFF)
 VEL_OFFSET = const(60)
 
-TRQ_DEFAULT = const(35)
-VEL_DEFAULT = const(255)
+TRQ_DEFAULT = const(10)
+VEL_DEFAULT = const(15)
 
 LENGTH = const(12000)
 # Encoder counts per TargetPosition step. move() and position use the same
@@ -33,11 +33,9 @@ POS_OFFSET_MIN = const(-128)
 
 # Homing: the motor is at the end stop when the position changes by less
 # than CAL_STEP for CAL_STABLE_COUNT samples in a row.
-CAL_STEP = const(10)
 CAL_STABLE_COUNT = const(10)
-CAL_SAMPLE_MS = const(10)
+CAL_SAMPLE_MS = const(50)
 CAL_SETTLE_MS = const(200)
-CAL_TIMEOUT_MS = const(10_000)
 CAL_HOME_OFFSET = const(400)  # Small offset so the platform is fully lowered
 
 def clamp_torque(val):
@@ -67,8 +65,15 @@ def scale_position(encoder, home):
 
 class Gate(Dynamixel):
 
-    def __init__(self, uart):
+    def __init__(self, uart: UART, vm: VMControl):
+        self.vm = vm
+        self.reset()
+
         super().__init__(uart, model=DynamixelModel.XM430_W210, id=1)
+
+        if self.model == DynamixelModel.XM430_W210:
+            self.set_voltage(12)
+
         self._offset = 0
         self.home_pos = 0
         self.target_pos = 0
@@ -287,7 +292,7 @@ class Gate(Dynamixel):
         try:
             speed, torque = self.speed, self.torque
             self._setup_servo()
-            await asyncio.wait_for_ms(self._find_home(), CAL_TIMEOUT_MS)
+            await self._find_home()
             self.home_pos = self.present_position + CAL_HOME_OFFSET
             self.target_pos = self.home_pos
             self._isdown = True
@@ -312,11 +317,24 @@ class Gate(Dynamixel):
         self.torque_enabled = True
         self.goal_extend_position = self.home_pos
         last_pos = self.present_position
+
         await asyncio.sleep_ms(CAL_SETTLE_MS)
         stable = 0
         while stable <= CAL_STABLE_COUNT:
             pos = self.present_position
-            if abs(last_pos - pos) < CAL_STEP:
+            if abs(last_pos - pos) < TOLERANCE:
                 stable += 1
+            else:
+                stable = 0
             last_pos = pos
             await asyncio.sleep_ms(CAL_SAMPLE_MS)
+
+    def reset(self):
+        self.set_voltage(7)
+
+    def set_voltage(self, voltage: int):
+        self.vm.enabled = False  # Disable VM before scanning
+        self.vm.set_voltage(voltage) 
+        time.sleep(0.3)
+        self.vm.enabled = True  # Enable VM after setting voltage
+        time.sleep(0.3)

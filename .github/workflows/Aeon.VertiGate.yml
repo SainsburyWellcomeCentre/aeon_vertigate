@@ -56,6 +56,7 @@ jobs:
           dotnet-version: 8.x
 
       - name: Set up .NET tools
+        working-directory: tools
         run: dotnet tool restore
 
       - name: Set up uv
@@ -64,13 +65,12 @@ jobs:
       # ----------------------------------------------------------------------- Regenerate
 
       - name: Generate C# interface
-        run: dotnet harp.toolkit generate interface csharp -o software/dotnet/${{github.workflow}} --namespace ${{github.workflow}}
+        working-directory: tools
+        run: dotnet tool run harp.toolkit generate interface csharp ../device.yml --namespace Aeon.VertiGate --output ../software/dotnet/Aeon.VertiGate
 
       - name: Generate Python interface
-        run: dotnet harp.toolkit generate interface python --package -o software/python/src/swc/aeon/device/vertigate
-
-      - name: Generate firmware version module
-        run: uv run firmware/tools/firmware_version.py
+        working-directory: tools
+        run: dotnet tool run harp.toolkit generate interface python ../device.yml --package --output ../software/python/src/swc/aeon/device/vertigate
 
       # ----------------------------------------------------------------------- Verify
       - name: Verify pre-generated code was up-to-date
@@ -106,7 +106,17 @@ jobs:
         uses: astral-sh/setup-uv@v8.3.2
 
       - name: Install the firmware libraries
-        run: uv pip install --directory firmware --target lib --no-deps --group libs
+        run: |
+          mkdir -p tools/lib
+          uv pip install --directory tools --target tools/lib --no-deps --group libs
+
+      - name: Verify board manifest inputs
+        run: |
+          test -f tools/boards/DYNAMIXEL_CONTROLLER/manifest.py
+          test -d tools/boards/DYNAMIXEL_CONTROLLER
+          test -d firmware/src
+          test -d tools/lib
+          ls -ld tools/boards/DYNAMIXEL_CONTROLLER tools/lib firmware/src
 
       # ----------------------------------------------------------------------- Configure build
       - name: Configure build
@@ -126,7 +136,7 @@ jobs:
         run: tools/ci.sh rp2_setup
 
       - name: Fetch MicroPython submodules
-        run: make -C micropython/ports/rp2 BOARD_DIR=${{github.workspace}}/firmware/boards/${{matrix.board}} submodules
+        run: make -C micropython/ports/rp2 BOARD_DIR=${{github.workspace}}/tools/boards/${{matrix.board}} submodules
 
       - name: Build mpy-cross
         run: make -C micropython/mpy-cross -j"$(nproc)"
@@ -134,11 +144,11 @@ jobs:
       # ----------------------------------------------------------------------- Build firmware
       - name: Build firmware
         id: build
-        run: make -C micropython/ports/rp2 BOARD_DIR=${{github.workspace}}/firmware/boards/${{matrix.board}} -j"$(nproc)"
+        run: make -C micropython/ports/rp2 BOARD_DIR=${{github.workspace}}/tools/boards/${{matrix.board}} -j"$(nproc)"
 
       - name: Name firmware image
         run: |
-          eval "$(sed -n 's/^\(FW_VERSION\|HW_VERSION\|HARP_VERSION\) = (\([0-9]*\), \([0-9]*\))$/\1=\2.\3/p' firmware/vertigate/_version.py)"
+          eval "$(sed -n 's/^\(FW_VERSION\|HW_VERSION\|HARP_VERSION\) = (\([0-9]*\), \([0-9]*\))$/\1=\2.\3/p' firmware/src/_version.py)"
           PREVIEW=""
           if [ "$CiFirmwarePreviewVersion" != "v" ]; then PREVIEW="-preview$CiFirmwarePreviewVersion"; fi
           NAME="VertiGate-fw$FW_VERSION-harp$HARP_VERSION-hw$HW_VERSION-ass0$PREVIEW.uf2"
@@ -204,6 +214,7 @@ jobs:
           dotnet-version: 8.x
 
       - name: Set up .NET tools
+        working-directory: tools
         run: dotnet tool restore
 
       # ----------------------------------------------------------------------- Configure build
@@ -306,6 +317,7 @@ jobs:
           dotnet-version: 8.x
 
       - name: Set up .NET tools
+        working-directory: tools
         run: dotnet tool restore
 
       - name: Set up uv
@@ -323,7 +335,8 @@ jobs:
       # ----------------------------------------------------------------------- Build metadata
       - name: Build metadata
         id: build-metadata
-        run: dotnet docfx metadata docs/docfx.json --noRestore
+        working-directory: tools
+        run: dotnet tool run docfx metadata ../docs/docfx.json --noRestore
 
       - name: Generate Python API reference
         run: uv run --locked docs/bonsai-docfx/scripts/generate-python-api.py --search-path software/python/src --inventory https://harp-tech.org/python/objects.inv
@@ -331,7 +344,8 @@ jobs:
       # ----------------------------------------------------------------------- Build documentation
       - name: Build documentation
         id: build-documentation
-        run: dotnet docfx build docs/docfx.json
+        working-directory: tools
+        run: dotnet tool run docfx build ../docs/docfx.json
 
       # ----------------------------------------------------------------------- Collect artifacts
       - name: Collect documentation metadata
@@ -381,7 +395,7 @@ jobs:
       - name: Set up Bonsai environments
         uses: bonsai-rx/setup-bonsai@v2
         with:
-          environment-paths: '**/.bonsai/'
+          environment-paths: 'tools/.bonsai/'
           inject-packages: artifacts/packages/*.nupkg
 
       # ----------------------------------------------------------------------- Render

@@ -165,23 +165,6 @@ def setup_register_handlers(device: HarpDevice, gate: Gate):
     async def _motor_state(reg):
         reg.storage[0] = 1 if gate.motor_enabled else 0
 
-    def _control_state():
-        """The state half of Control, as the `Enable` bit of each pair.
-
-        Stop and Calibrate are commands, not states, so they never appear.
-        """
-        state = CTRL_ENABLE_MOTOR if gate.motor_enabled else 0
-        if gate.position_events:
-            state |= CTRL_ENABLE_POSITION_EVENT
-        if gate.telemetry_events:
-            state |= CTRL_ENABLE_TELEMETRY_EVENT
-        return state
-
-    def _save_control_state(reg):
-        """Put the state in the register and on the flash."""
-        state = _control_state()
-        reg.storage[0] = state
-        _store(ADDR_CONTROL, state)
 
     @device.on_read(address=ADDR_CONTROL, payload_type=PT_U8, name="Control")
     async def _control_read(reg):
@@ -355,6 +338,23 @@ def setup_register_handlers(device: HarpDevice, gate: Gate):
             return ERR_STORAGE
         _reboot_after_reply()
 
+    def _control_state():
+        """The state half of Control, as the `Enable` bit of each pair.
+
+        Stop and Calibrate are commands, not states, so they never appear.
+        """
+        state = CTRL_ENABLE_MOTOR if gate.motor_enabled else 0
+        if gate.position_events:
+            state |= CTRL_ENABLE_POSITION_EVENT
+        if gate.telemetry_events:
+            state |= CTRL_ENABLE_TELEMETRY_EVENT
+        return state
+
+    def _save_control_state(reg):
+        """Put the state in the register and on the flash."""
+        state = _control_state()
+        reg.storage[0] = state
+        _store(ADDR_CONTROL, state)
 
 def boot_motor_enabled():
     """Whether the stored Control state has the motor enabled.
